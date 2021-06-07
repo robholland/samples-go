@@ -19,3 +19,5 @@ go run ui/main.go
 ```
 
 Once the UI has exited you will be able to see delivery details in the worker output, as might have been emailed to you in a real implementation.
+
+![alt text](flow.png)
