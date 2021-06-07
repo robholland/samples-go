@@ -1,0 +1,28 @@
+@startuml
+ui -> temporal : ExecuteWorkflow(OrderWorkflow)
+temporal -> OrderWorkflow : Schedule()
+
+ui -> temporal : ExecuteWorkflow(UpdateOrder, RegisterStage, email)
+temporal -> UpdateOrderWorkflow1 : Schedule()
+UpdateOrderWorkflow1 -> OrderWorkflow : SignalExternalWorkflow(email)
+OrderWorkflow --> UpdateOrderWorkflow1 : SignalExternalWorkflow(SizeStage)
+UpdateOrderWorkflow1 -> ui : UpdateOrderWorkflow1.Result()
+
+ui -> temporal : ExecuteWorkflow(UpdateOrder, SizeStage, size)
+temporal -> UpdateOrderWorkflow2 : Schedule()
+UpdateOrderWorkflow2 -> OrderWorkflow : SignalExternalWorkflow(size)
+OrderWorkflow --> UpdateOrderWorkflow2 : SignalExternalWorkflow(ColorStage)
+UpdateOrderWorkflow2 -> ui : UpdateOrderWorkflow2.Result()
+
+ui -> temporal : ExecuteWorkflow(UpdateOrder, ColorStage, color)
+temporal -> UpdateOrderWorkflow3 : Schedule()
+UpdateOrderWorkflow3 -> OrderWorkflow : SignalExternalWorkflow(color)
+OrderWorkflow --> UpdateOrderWorkflow3 : SignalExternalWorkflow(ShippingStage)
+UpdateOrderWorkflow3 -> ui : UpdateOrderWorkflow3.Result()
+note over ui : Finished
+
+OrderWorkflow -> temporal : ExecuteWorkflow(ShippingWorkflow, order)
+temporal -> ShippingWorkflow : Schedule()
+ShippingWorkflow -> ShippingWorkflow : ExecuteActivity(ScheduleDelivery, order)
+ShippingWorkflow -> ShippingWorkflow : ExecuteActivity(SendDeliveryEmail, order, deliveryDate)
+@enduml
